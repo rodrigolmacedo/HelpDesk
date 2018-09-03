@@ -1,0 +1,1 @@
+insert into comment(id,user_id,text,date,ticket_id) values (null, 3,'comment','2018-09-08',1);

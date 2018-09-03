@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Overview</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link th:href="@{/static/css/styles.css}" rel="stylesheet" type="text/css">
+</head>
+<body ng-app="app" ng-controller="TicketOverviewController">
+<form th:action="@{/logout}">
+    <input type="submit" style="position: absolute; left: 30px; top:30px;" class="btn"
+           value="Logout">
+</form>
+<div class="col-md-2">
+    <form th:action="@{/tickets}">
+        <input type="submit" style="float: right;" class="btn btn-primary create-new-btn"
+               value="Ticket List">
+    </form>
+</div>
+<div class="col-md-5" style="margin-top: 50px;">
+    <h1>Ticket ({{ticket.id}}) - {{ticket.name}}</h1>
+    <div class="form-group">
+        <label for="created" class="col-sm-6 control-label font-overview">Created on</label>
+        <p id="created" class="col-sm-6 font-overview">{{ticket.createdOn}}</p>
+        <label for="status" class="col-sm-6 control-label font-overview">State</label>
+        <p id="status" class="col-sm-6 font-overview">{{ticket.state}}</p>
+        <label for="urgency" class="col-sm-6 control-label font-overview">Urgency</label>
+        <p id="urgency" class="col-sm-6 font-overview">{{ticket.urgency}}</p>
+        <label for="desiredDate" class="col-sm-6 control-label font-overview">Desired resolution</label>
+        <p id="desiredDate" class="col-sm-6 font-overview">{{ticket.desiredResolutionDate}}</p>
+        <label for="owner" class="col-sm-6 control-label font-overview">Owner</label>
+        <p id="owner" class="col-sm-6 font-overview">{{owner.firstName}} {{owner.lastName}}</p>
+        <label for="approver" class="col-sm-6 control-label font-overview">Approver</label>
+        <p id="approver" ng-if="approver!=null" class="col-sm-6 font-overview">{{approver.firstName}}
+            {{approver.lastName}}</p>
+        <p ng-if="approver==null" class="col-sm-6 font-overview">-</p>
+        <label for="assignee" class="col-sm-6 control-label font-overview">Assignee</label>
+        <p id="assignee" ng-if="assignee!=null" class="col-sm-6 font-overview">{{assignee.firstName}}
+            {{assignee.lastName}}</p>
+        <p ng-if="assignee==null" class="col-sm-6 font-overview">-</p>
+        <label for="category" class="col-sm-6 control-label font-overview">Category</label>
+        <p id="category" class="col-sm-6 font-overview">{{ticket.category}}</p>
+        <label for="attachment" class="col-sm-6 control-label font-overview">Attachments</label>
+        <a ng-if="attachments.length!=0" ng-repeat="attachment in attachments"
+           href="/ticket/{{ticket.id}}/attachments/{{attachment.id}}"
+           id="attachment"
+           class="col-sm-6 font-overview">{{attachment.name}}</a>
+        <p ng-if="attachments.length==0" class="col-sm-6 font-overview">-</p>
+        <label for="description" class="col-sm-6 control-label font-overview">Description</label>
+        <p id="description" ng-if="ticket.description!=null" class="col-sm-6 font-overview">
+            {{ticket.description}}</p>
+        <p ng-if="ticket.description==''||ticket.description==null" class="col-sm-6 font-overview">-</p>
+        <div ng-show="feedback.rate!=null">
+            <label for="rate" class="col-sm-6 control-label font-overview">Feedback rate</label>
+            <p id="rate" class="col-sm-6 font-overview">{{feedback.rate}}</p>
+            <label for="feedbacktext" class="col-sm-6 control-label font-overview">Feedback text</label>
+            <p id="feedbacktext" class="col-sm-6 font-overview">{{feedback.text}}</p>
+        </div>
+    </div>
+</div>
+<div class="col-md-5">
+    <div class="form-inline">
+        <div class="col-md-4">
+            <form th:action="@{{{editUrl}}}">
+                <input type="submit" ng-disabled="(ticket.state!='Draft')&&(ticket.state!='Declined')" style="float: right;"
+                       class="btn btn-primary create-new-btn"
+                       value="Edit">
+            </form>
+        </div>
+        <div class="col-md-4" ng-show="(ticket.state=='Done')&&(ticket.feedback==null)">
+            <form ng-disabled="ticket.feedback==null" th:action="@{{{leaveFeedbackUrl}}}">
+                <input type="submit" style="float: right;" class="btn btn-primary create-new-btn"
+                       value="Leave Feedback">
+            </form>
+        </div>
+        <div class="col-md-4" ng-show="(ticket.state=='Done')&&(ticket.feedback!=null)">
+            <form th:action="@{{{viewFeedbackUrl}}}">
+                <input type="submit" style="float: right;" class="btn btn-primary create-new-btn"
+                       value="View Feedback">
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container wide-content" style="margin-top:50px;">
+    <ul class="nav nav-pills nav-justified clear">
+        <li class="active pill"><a data-toggle="pill" href="#history">History</a>
+        </li>
+        <li class="pill"><a data-toggle="pill" href="#comments">Comments</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="history" class="tab-pane fade in active">
+            <a href="" ng-click="showHistory()" style="margin-top: 30px;">Show all</a>
+            <table class="table-bordered table-striped table">
+                <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Description</th>
+                </tr>
+                <tr ng-repeat="historyItem in history" ng-show="historyItem.orderId<5||showAllHistory">
+                    <td>{{historyItem.date}}</td>
+                    <td>{{historyItem.userFirstName}} {{historyItem.userLastName}}</td>
+                    <td>{{historyItem.action}}</td>
+                    <td>{{historyItem.description}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="comments" class="tab-pane fade">
+            <a href="" ng-click="showComments()" style="margin-top: 30px;">Show all</a>
+            <table class="table-bordered table-striped table">
+                <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Comment</th>
+                </tr>
+                <tr ng-repeat="comment in comments" ng-show="comment.orderId<5||showAllComments">
+                    <td>{{comment.date}}</td>
+                    <td>{{comment.user.firstName}} {{comment.user.lastName}}</td>
+                    <td>{{comment.text}}</td>
+                </tr>
+            </table>
+            <form class="form-inline" style="margin-top:50px;
+    margin-bottom: 50px;">
+    <textarea id="comment" ng-model="newComment" class="form-control" style="width: 70%;" name="comment" rows="3"
+              onkeypress="return validateDescription(event)"
+              required></textarea>
+                <input type="submit" ng-click="addComment()" class="btn btn-primary header-button form-control"
+                       style="width: 25%;"
+                       value="Add Comment">
+            </form>
+        </div>
+    </div>
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script th:src="@{/static/js/validator.js}"></script>
+<script th:src="@{/static/js/app.js}"></script>
+<script th:src="@{/static/js/services/tickets-service.js}"></script>
+<script th:src="@{/static/js/services/feedback-service.js}"></script>
+<script th:src="@{/static/js/controllers/tickets-overview-controller.js}"></script>
+</body>
+</html>

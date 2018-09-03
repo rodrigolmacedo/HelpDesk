@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HelpDesk</title>
+</head>
+<body>
+<h1 align="center" th:text="'Dear '+${recipient.firstName}+' '+${recipient.lastName}+','"></h1>
+<table align="center" style="font-size: 18px;">
+    <tr>
+        <td>Ticket <a th:href="'http://localhost:8080/overview/'+${ticketId}" th:text="${ticketId}"></a>
+            was cancelled by the Manager
+        </td>
+    </tr>
+</table>
+</body>
+</html>

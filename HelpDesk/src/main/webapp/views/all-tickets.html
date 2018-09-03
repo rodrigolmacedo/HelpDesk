@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All tickets</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link th:href="@{/static/css/styles.css}" rel="stylesheet" type="text/css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+</head>
+<body ng-app="app" ng-controller="TicketsController">
+<form th:action="@{/logout}">
+    <input type="submit" style="position: absolute; left: 30px; top:30px;" class="btn"
+           value="Logout">
+</form>
+<br/>
+<div class="container content">
+    <form th:action="@{/newticket}">
+        <input type="submit" style="float: right;" class="btn btn-primary create-new-btn"
+               value="Create New Ticket" ng-disabled="role=='engineer'">
+    </form>
+    <ul class="nav nav-pills nav-justified clear">
+        <li class="active pill"><a data-toggle="pill" href="#allTickets">All Tickets</a>
+
+        <li class="pill"><a data-toggle="pill" href="#myTickets">My Tickets</a>
+    </ul>
+
+    <div class="tab-content">
+        <div id="allTickets" class="tab-pane fade in active">
+
+            <form class="search">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
+                        <input type="text" class="form-control" placeholder="Search" ng-model="searchTicket"
+                               onkeypress="return validateDescription(event)">
+                    </div>
+                </div>
+            </form>
+
+            <table class="table-bordered table-striped table" style="width: 800px;">
+                <tr>
+                    <th>
+                        <a href="#" ng-click="sortType='id';sortReverse=!sortReverse">ID
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='id' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='id' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='name';sortReverse=!sortReverse">Name
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='name' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='name' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='desiredResolutionDate';sortReverse=!sortReverse">Desired Date
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='desiredResolutionDate' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='desiredResolutionDate' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='urgencyNumber';sortReverse=!sortReverse">Urgency
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='urgencyNumber' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='urgencyNumber' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='state';sortReverse=!sortReverse">State
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='state' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='state' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        Action
+                    </th>
+                </tr>
+                <tr ng-repeat="ticket in allTickets | orderBy:sortType:sortReverse|filter:searchTicket track by $index">
+                    <td>{{ticket.id}}</td>
+                    <td><a th:href="@{overview/{{ticket.id}}}">{{ticket.name}}</a></td>
+                    <td>{{ticket.desiredResolutionDate}}</td>
+                    <td>{{ticket.urgency}}</td>
+                    <td>{{ticket.state}}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" style="background-color: limegreen;"
+                                    type="button"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                    ng-disabled="!((ticket.state=='New')&&(role=='manager')&&(ticket.owner.id!=user.id))
+                            &&!(ticket.state=='New'&&role=='manager'&&ticket.owner.id!=user.id)
+                                &&!((role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id))
+                                &&!((role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id)||
+                                (role=='manager'&&(ticket.state=='New'&&ticket.owner.id!=user.id))||
+                                (role=='engineer'&&ticket.state=='Approved'))
+                                &&!((role=='enginer')&&(ticket.state=='Approved'))
+                                &&!((role=='enginer')&&(ticket.state=='In progress'))
+                                &&!((ticket.state=='Done')&&(user.id==ticket.owner.id)&&(ticket.feedback==null))
+                                &&!((ticket.state=='Done')&&(ticket.feedback!=null))">
+                                Action
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-show="(ticket.state=='New')&&(role=='manager')&&(ticket.owner.id!=user.id)">
+                                    <a href="" ng-click="doAction('approve', ticket.id)">Approve</a>
+                                </li>
+                                <li ng-show="ticket.state=='New'&&role=='manager'&&ticket.owner.id!=user.id">
+                                    <a href="" ng-click="doAction('decline', ticket.id)">Decline</a>
+                                </li>
+                                <li ng-show="(role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id)">
+                                    <a href="" ng-click="doAction('submit', ticket.id)">Submit</a></li>
+                                <li ng-show="(role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id)||
+                                (role=='manager'&&(ticket.state=='New'&&ticket.owner.id!=user.id))||
+                                (role=='engineer'&&ticket.state=='Approved')">
+                                    <a href="" ng-click="doAction('cancel', ticket.id)">Cancel</a></li>
+                                <li ng-show="(role=='enginer')&&(ticket.state=='Approved')">
+                                    <a href="" ng-click="doAction('assign', ticket.id)">Assign
+                                        to me</a></li>
+                                <li ng-show="(role=='enginer')&&(ticket.state=='In progress')">
+                                    <a href="" ng-click="doAction('done', ticket.id)">Done</a>
+                                </li>
+                                <li ng-show="(ticket.state=='Done')&&(user.id==ticket.owner.id)&&(ticket.feedback==null)">
+                                    <a href="" ng-click="doAction('leavefeedback', ticket.id)">Leave
+                                        Feedback</a></li>
+                                <li ng-show="(ticket.state=='Done')&&(ticket.feedback!=null)">
+                                    <a href="" ng-click="doAction('viewfeedback', ticket.id)">View Feedback</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+        <div id="myTickets" class="tab-pane fade">
+            <form class="search">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
+                        <input type="text" class="form-control" placeholder="Search" ng-model="searchTicket"
+                               onkeypress="return validateDescription(event)">
+                    </div>
+                </div>
+            </form>
+
+            <table class="table-bordered table-striped table" style="width: 800px;">
+                <tr>
+                    <th>
+                        <a href="#" ng-click="sortType='id';sortReverse=!sortReverse">ID
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='id' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='id' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='name';sortReverse=!sortReverse">Name
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='name' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='name' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='desiredResolutionDate';sortReverse=!sortReverse">Desired Date
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='desiredResolutionDate' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='desiredResolutionDate' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='urgencyNumber';sortReverse=!sortReverse">Urgency
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='urgencyNumber' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='urgencyNumber' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sortType='state';sortReverse=!sortReverse">State
+                            <span class="glyphicon glyphicon-triangle-bottom"
+                                  ng-show="sortType=='state' && !sortReverse"></span>
+                            <span class="glyphicon glyphicon-triangle-top"
+                                  ng-show="sortType=='state' && sortReverse"></span>
+                        </a>
+                    </th>
+                    <th>
+                        Action
+                    </th>
+                </tr>
+                <tr ng-repeat="ticket in myTickets | orderBy:sortType:sortReverse|filter:searchTicket">
+                    <td>{{ticket.id}}</td>
+                    <td><a th:href="@{overview/{{ticket.id}}}">{{ticket.name}}</a></td>
+                    <td>{{ticket.desiredResolutionDate}}</td>
+                    <td>{{ticket.urgency}}</td>
+                    <td>{{ticket.state}}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" style="background-color: limegreen;"
+                                    type="button"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                    ng-disabled="!((ticket.state=='New')&&(role=='manager')&&(ticket.owner.id!=user.id))
+                            &&!(ticket.state=='New'&&role=='manager'&&ticket.owner.id!=user.id)
+                            &&!((role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id))
+                                &&!((role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id)||
+                                (role=='manager'&&(ticket.state=='New'&&ticket.owner.id!=user.id))||
+                                (role=='engineer'&&ticket.state=='Approved'))
+                                &&!((role=='engineer')&&(ticket.state=='Approved'))
+                                &&!((role=='engineer')&&(ticket.state=='In progress'))
+                                &&!((ticket.state=='Done')&&(user.id==ticket.owner.id)&&(ticket.feedback==null))
+                                &&!((ticket.state=='Done')&&(ticket.feedback!=null))">
+                                Action
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-show="(ticket.state=='New')&&(role=='manager')&&(ticket.owner.id!=user.id)">
+                                    <a href="" ng-click="doAction('approve', ticket.id)">Approve</a>
+                                </li>
+                                <li ng-show="ticket.state=='New'&&role=='manager'&&ticket.owner.id!=user.id">
+                                    <a href="" ng-click="doAction('decline', ticket.id)">Decline</a>
+                                </li>
+                                <li ng-show="(role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id)">
+                                    <a href="" ng-click="doAction('submit', ticket.id)">Submit</a></li>
+                                <li ng-show="(role=='employee'&&(ticket.state=='Draft'||ticket.state=='Declined'))||
+                                (role=='manager'&&(ticket.state=='Draft'||ticket.state=='Declined')&&ticket.owner.id==user.id)||
+                                (role=='manager'&&(ticket.state=='New'&&ticket.owner.id!=user.id))||
+                                (role=='engineer'&&ticket.state=='Approved')">
+                                    <a href="" ng-click="doAction('cancel', ticket.id)">Cancel</a></li>
+                                <li ng-show="(role=='engineer')&&(ticket.state=='Approved')">
+                                    <a href="" ng-click="doAction('assign', ticket.id)">Assign
+                                        to me</a></li>
+                                <li ng-show="(role=='engineer')&&(ticket.state=='In progress')">
+                                    <a href="" ng-click="doAction('done', ticket.id)">Done</a>
+                                </li>
+                                <li ng-show="(ticket.state=='Done')&&(user.id==ticket.owner.id)&&(ticket.feedback==null)">
+                                    <a href="" ng-click="doAction('leavefeedback', ticket.id)">Leave
+                                        Feedback</a></li>
+                                <li ng-show="(ticket.state=='Done')&&(ticket.feedback!=null)">
+                                    <a href="" ng-click="doAction('viewfeedback', ticket.id)">View Feedback</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script th:src="@{/static/js/validator.js}"></script>
+<script th:src="@{/static/js/app.js}"></script>
+<script th:src="@{/static/js/services/tickets-service.js}"></script>
+<script th:src="@{/static/js/controllers/tickets-controller.js}"></script>
+</body>
+</html>

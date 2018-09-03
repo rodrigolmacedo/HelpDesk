@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Leave Feedback</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" th:href="@{/static/css/feedback.css}">
+</head>
+<body ng-app="app" ng-controller="LeaveFeedback">
+<form th:action="@{/logout}">
+    <input type="submit" style="position: absolute; left: 30px; top:30px;" class="btn"
+           value="Logout">
+</form>
+<div class="form-inline top-element">
+    <input type="button" class="btn btn-primary ticket-list-btn" style="display:inline-block;margin-left: 50px;"
+           value="Back" onclick=" window.history.back();">
+    <h1 style="margin-left: 50px;padding-top:50px;display: inline-block;">Ticket ({{ticket.id}}) - {{ticket.name}}</h1>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="Absolute-Center is-Responsive">
+            <h2 style="max-width: 800px;">Please, rate your satisfaction with the solution:</h2>
+            <div class="stars">
+                <form action="">
+                    <input ng-click="saveRate(5)" class="star star-5" id="star-5" type="radio" name="star"/>
+                    <label class="star star-5" for="star-5"></label>
+                    <input ng-click="saveRate(4)" class="star star-4" id="star-4" type="radio" name="star"/>
+                    <label class="star star-4" for="star-4"></label>
+                    <input ng-click="saveRate(3)" class="star star-3" id="star-3" type="radio" name="star"/>
+                    <label class="star star-3" for="star-3"></label>
+                    <input ng-click="saveRate(2)" class="star star-2" id="star-2" type="radio" name="star"/>
+                    <label class="star star-2" for="star-2"></label>
+                    <input ng-click="saveRate(1)" class="star star-1" id="star-1" type="radio" name="star"/>
+                    <label class="star star-1" for="star-1"></label>
+                </form>
+                <textarea class="form-control full-width" id="text" ng-model="text" maxlength="500" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-inline push-to-bottom">
+        <input type="submit" ng-click="leaveFeedback()" name="new" class="btn btn-primary ticket-list-btn"
+               value="Submit">
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script th:src="@{/static/js/app.js}"></script>
+<script th:src="@{/static/js/services/tickets-service.js}"></script>
+<script th:src="@{/static/js/services/feedback-service.js}"></script>
+<script th:src="@{/static/js/controllers/leave-feedback-controller.js}"></script>
+</body>
+</html>

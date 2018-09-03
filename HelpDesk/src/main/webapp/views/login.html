@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link th:href="@{/static/css/signin.css}" rel="stylesheet" type="text/css">
+</head>
+<script>
+    function validateForm() {
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+        if (email.indexOf('@') == -1 || email.indexOf('@') == 0 || email.indexOf('@') == email.length - 1 ||
+            email.indexOf('.') == -1 || email.indexOf('.') == 0 || email.indexOf('.') == email.length - 1) {
+            return false
+        }
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~."(),:;<>@!#$%&'*+-=?^_`{|}])[A-Za-z\d~."(),:;<>@!#$%&'*\+\-\=\?\^_`{|}]{6,20}/.test(password)) {
+            return false;
+        }
+        return true;
+    }
+</script>
+<body>
+<form class="form-horizontal form-signin" th:action="@{/login}" th:method="post">
+    <h2 class="form-signin-heading">Login to the Help Desk</h2>
+    <div class="form-group">
+        <label for="email" class="col-sm-2 control-label">Email</label>
+        <div class="col-sm-10">
+            <input type="email" class="form-control" id="email" name="email" required placeholder="Email"
+            pattern="^[^.@].*[^.@]$">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="password" class="col-sm-2 control-label">Password</label>
+        <div class="col-sm-10">
+            <input type="password" class="form-control" id="password" name="password" required placeholder="Password"
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~.\x22(),:;<>@!#$%&'*+-=?^_`{|}])[A-Za-z\d~.\x22(),:;<>@!#$%&'*+-=?^_`{|}]{6,20}">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <p style="font-size: 15px;" th:text="${error}"></p>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Sign in</button>
+        </div>
+    </div>
+</form>
+
+</body>
+</html>
